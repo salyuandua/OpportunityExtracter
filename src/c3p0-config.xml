@@ -1,0 +1,16 @@
+<c3p0-config>
+	<default-config>
+		<property name="checkoutTimeout">30000</property>
+		<property name="maxPoolSize">5</property>
+		<property name="minPoolSize">1</property>
+		<property name="acquireIncrement">1</property>
+		<property name="initialPoolSize">1</property>
+		<property name="maxStatements">0</property>
+		<property name="driverClass">com.mysql.cj.jdbc.Driver</property>
+		<property name="jdbcUrl">jdbc:mysql://localhost:3306/grantmaster?charset=utf-8</property>
+		<property name="user">root</property>
+		<property name="password">1234</property>
+		<property name="contextClassLoaderSource">library</property>
+		<property name="privilegeSpawnedThreads" >true</property>
+	</default-config>
+</c3p0-config>
