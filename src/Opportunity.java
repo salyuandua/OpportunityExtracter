@@ -30,8 +30,22 @@ private String oppo_fund_av;
 private String oppo_desc;
 private int oppo_type;
 private String oppo_type_name;
+private int islike;
+private int isdislike;
+private String topic;
 
 
+
+
+
+public Opportunity(int oppo_id, String oppo_name, String deadlineStr, String oppo_from, String oppo_from_url,
+		String oppo_pro_url, String oppo_fund_av, String oppo_desc, int oppo_type, String oppo_type_name, int islike,
+		int isdislike,String topic) {
+	this(oppo_id, oppo_name, oppo_from_url, oppo_pro_url, oppo_fund_av, oppo_desc, oppo_type, oppo_type_name, deadlineStr);
+	this.islike = islike;
+	this.isdislike = isdislike;
+	this.topic=topic;
+}
 
 public Opportunity(int oppo_id, String oppo_name, String oppo_from,
 		String oppo_pro_url, String oppo_fund_av, String oppo_desc, int oppo_type, String oppo_type_name,String deadlines_str) {
@@ -60,6 +74,30 @@ public Opportunity(int oppo_id,String oppo_name,String oppo_desc) {
 
 
 
+
+public String getTopic() {
+	return topic;
+}
+
+public void setTopic(String topic) {
+	this.topic = topic;
+}
+
+public int getIslike() {
+	return islike;
+}
+
+public void setIslike(int islike) {
+	this.islike = islike;
+}
+
+public int getIsdislike() {
+	return isdislike;
+}
+
+public void setIsdislike(int isdislike) {
+	this.isdislike = isdislike;
+}
 
 public String getOppo_from_url() {
 	return oppo_from_url;

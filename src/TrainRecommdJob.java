@@ -1,6 +1,7 @@
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
-
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
@@ -20,8 +21,9 @@ import org.junit.Test;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
+import org.w3c.dom.stylesheets.LinkStyle;
 
-
+import com.alibaba.fastjson.JSON;
 
 import cc.mallet.pipe.CharSequence2TokenSequence;
 import cc.mallet.pipe.CharSequenceLowercase;
@@ -42,6 +44,7 @@ public class TrainRecommdJob implements Job{
 private OpportunitiesDataReader oppoReader=new OpportunitiesDataReader(ConnectionBuilder.getConnection());
 private List<Topic> topics;	
 private List<SortedTopicList> topicsCounts;	
+private OpportunityService oService=new OpportunityService();
 	
 	@Override
 	public void execute(JobExecutionContext context) throws JobExecutionException {
@@ -66,8 +69,62 @@ private List<SortedTopicList> topicsCounts;
 	
 	
 	
-	private void prodict4User() {
-		String 
+	public void predict4User() {
+		//write for testing
+		File f=new File("C:\\Users\\l1876\\Desktop\\project_files\\distance.txt");
+		FileWriter w=null;
+		//predict oppos list
+		List<Opportunity> predictOppos=new ArrayList<Opportunity>();
+		try {
+			w=new FileWriter(f);
+
+		
+		//get like list
+		List<Opportunity> likeOppos=oService.getLikeOppos();
+		//get dislike list
+		List<Opportunity> dislikeOppos=oService.getDislikeOppos();
+		//potiental opportunities
+		List<Opportunity> potentialOppos=oService.getPotentialOppos();
+
+		for(Opportunity potentialOppo:potentialOppos) {
+			long distance2Like=0;
+			long distance2Dislike=0;
+			//compute sum distance with like-opportunities
+			
+			for(Opportunity likeOppo:likeOppos) {
+				distance2Like+=computeDocsDistance(potentialOppo.getTopic(), likeOppo.getTopic());
+				
+				
+			}
+			//System.out.println(distance2Like/likeOppos.size());
+			//compute sum distance with dislike-opportunities
+			
+			for(Opportunity dislikeOppo:dislikeOppos) {
+				distance2Dislike+=computeDocsDistance(potentialOppo.getTopic(), dislikeOppo.getTopic());
+				//System.out.println(distance2Dislike/likeOppos.size());
+			}
+			distance2Like=distance2Like/likeOppos.size();
+			distance2Dislike=distance2Dislike/dislikeOppos.size();
+
+			w.write("\n"+distance2Like+","+distance2Dislike);
+			w.flush();
+			if(distance2Dislike>=distance2Like) {
+				predictOppos.add(potentialOppo);
+			}
+		}
+		
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}finally {
+			try {
+				w.close();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		System.out.println(predictOppos.size());
 	}
 	
 	
@@ -92,7 +149,7 @@ private List<SortedTopicList> topicsCounts;
 		long distance=0;
 		for(int i=0;i<docArray1.length;i++) {
 			for(int j=0;j<docArray2.length;j++) {
-				if(docArray1[i].equals(docArray2[j])) {
+				if(!docArray1[i].equals(docArray2[j])) {
 					distance++;
 				}
 			}
@@ -254,8 +311,8 @@ private List<SortedTopicList> topicsCounts;
 //			// TODO Auto-generated catch block
 //			e.printStackTrace();
 //		}
-		
-		System.out.println(j.computeDocsDistance(" jack loves you and me", "me first loves is jack"));
+		j.predict4User();
+		//System.out.println(j.computeDocsDistance(" jack loves you and me", "me first loves is jack"));
 		
 		
 		
