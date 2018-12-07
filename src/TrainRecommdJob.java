@@ -9,7 +9,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
-
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -39,6 +39,7 @@ import cc.mallet.types.FeatureSequence;
 import cc.mallet.types.IDSorter;
 import cc.mallet.types.InstanceList;
 import cc.mallet.types.LabelSequence;
+import net.didion.jwnl.data.Word;
 
 public class TrainRecommdJob implements Job{
 private OpportunitiesDataReader oppoReader=new OpportunitiesDataReader(ConnectionBuilder.getConnection());
@@ -105,10 +106,11 @@ private OpportunityService oService=new OpportunityService();
 			}
 			distance2Like=distance2Like/likeOppos.size();
 			distance2Dislike=distance2Dislike/dislikeOppos.size();
-
-			w.write("\n"+distance2Like+","+distance2Dislike);
+			long difference=distance2Like-distance2Dislike;
+			w.write("\n"+difference+"***"+potentialOppo.getOppo_name()+"****"+potentialOppo.getTopic());
 			w.flush();
-			if(distance2Dislike>=distance2Like) {
+			if(difference<0) {
+				potentialOppo.setDifference(difference);
 				predictOppos.add(potentialOppo);
 			}
 		}
@@ -124,11 +126,26 @@ private OpportunityService oService=new OpportunityService();
 				e.printStackTrace();
 			}
 		}
+		Collections.sort(predictOppos);
 		System.out.println(predictOppos.size());
+		for(Opportunity o:predictOppos.subList(0, 500)) {
+			System.out.println(o.getDifference()+","+o.getOppo_name());
+		}
 	}
 	
 	
 	
+	
+	
+	private boolean isWordExistingInArray(String word,String[] array) {
+		for(String s:array) {
+			if(s.equals(word)) {
+				return true;
+			}
+		}
+		return false;
+		
+	}
 	
 	
 	/**
@@ -148,10 +165,8 @@ private OpportunityService oService=new OpportunityService();
 		String[] docArray2=doc2.split(" ");
 		long distance=0;
 		for(int i=0;i<docArray1.length;i++) {
-			for(int j=0;j<docArray2.length;j++) {
-				if(!docArray1[i].equals(docArray2[j])) {
-					distance++;
-				}
+			if(!isWordExistingInArray(docArray1[i], docArray2)) {
+				distance++;
 			}
 		}
 		return distance;
@@ -178,13 +193,31 @@ private OpportunityService oService=new OpportunityService();
 				List<TopicCountNode> topicList= sortedTopicList.getTopTopics(3);
 				//construct topic string
 				StringBuilder topicStr=new StringBuilder("");
+				if(topicList.size()==1) {//take top 90 words from topic
+					topicList.get(0).setTopicCount(90);
+					
+					
+				}else if(topicList.size()==2) {
+					topicList.get(0).setTopicCount(45);
+					topicList.get(1).setTopicCount(45);
+					
+					
+				}else {
+					topicList.get(0).setTopicCount(30);
+					topicList.get(1).setTopicCount(30);
+					topicList.get(2).setTopicCount(30);
+					
+				}
+				
+				
+				
 				for(TopicCountNode node:topicList) {
 					int topicCount= node.getTopicCount();
-					//100 words max for a topic
-					if(topicCount>100) {
-						topicCount=100;
-					}
-					//System.out.println(topicCount);
+//					//100 words max for a topic
+//					if(topicCount>100) {
+//						topicCount=100;
+//					}
+//					//System.out.println(topicCount);
 					for(int j=0;j<topicCount;j++) {
 						topicStr.append(topics.get(node.getTopicIndex()).getWords().get(j)+" ") ;
 					}

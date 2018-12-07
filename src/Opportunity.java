@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-public class Opportunity {
+public class Opportunity implements Comparable<Opportunity>{
 	public static Map<Integer, String> int2OppoType=new HashMap<Integer, String>();
 	static {
 		int2OppoType.put(1, "Normal");
@@ -33,7 +33,7 @@ private String oppo_type_name;
 private int islike;
 private int isdislike;
 private String topic;
-
+private long difference;
 
 
 
@@ -74,6 +74,14 @@ public Opportunity(int oppo_id,String oppo_name,String oppo_desc) {
 
 
 
+
+public long getDifference() {
+	return difference;
+}
+
+public void setDifference(long difference) {
+	this.difference = difference;
+}
 
 public String getTopic() {
 	return topic;
@@ -197,6 +205,18 @@ public String getOppo_type_name() {
 }
 public void setOppo_type_name(String oppo_type_name) {
 	this.oppo_type_name = oppo_type_name;
+}
+
+@Override
+public int compareTo(Opportunity o) {
+	if(this.difference>o.difference) {
+		return 1;
+	}else if(this.difference<o.difference) {
+		return -1;
+	}else {
+		return 0;
+	}
+	
 }
 
 
